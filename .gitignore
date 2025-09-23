@@ -1,0 +1,15 @@
+# Dependencies
+node_modules
+
+# Logs
+logs
+*.log
+npm-debug.log*
+
+# Environment variables
+# Keep environment variables out of version control
+.env
+
+# OS / Editor specific
+.DS_Store
+.vscode/

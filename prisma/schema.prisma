@@ -1,0 +1,121 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model User {
+  id            String              @id @default(cuid())
+  email         String              @unique
+  name          String?
+  password      String
+  role          Role                @default(ADMIN)
+  resetToken    PasswordResetToken?
+  emailVerified DateTime?
+  isActive      Boolean             @default(true)
+  createdAt     DateTime            @default(now())
+  updatedAt     DateTime            @updatedAt
+}
+
+enum Role {
+  ADMIN
+  EDITOR
+  VIEWER
+}
+
+/**
+ * ---- new for Step 2 ----
+ */
+
+model Site {
+  id        String   @id @default(cuid())
+  name      String
+  domain    String?
+  createdAt DateTime @default(now())
+  pages     Page[]
+}
+
+model Page {
+  id     String @id @default(cuid())
+  siteId String
+  site   Site   @relation(fields: [siteId], references: [id])
+
+  slug      String
+  title     String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // pointer to current published version (must be unique for 1-1)
+  publishedVersionId String?      @unique
+  publishedVersion   PageVersion? @relation("PublishedVersion", fields: [publishedVersionId], references: [id])
+
+  // all versions (normal 1-many)
+  versions PageVersion[]
+
+  @@unique([siteId, slug])
+}
+
+model PageVersion {
+  id String @id @default(cuid())
+
+  // normal backref
+  pageId String
+  page   Page   @relation(fields: [pageId], references: [id])
+
+  // opposite side of the 1-1 published pointer
+  publishedOnPage Page? @relation("PublishedVersion")
+
+  status    VersionStatus
+  content   Json
+  label     String?
+  createdBy String?
+  createdAt DateTime      @default(now())
+
+  // one DRAFT and one PUBLISHED per page (MVP)
+  @@unique([pageId, status])
+}
+
+enum VersionStatus {
+  DRAFT
+  PUBLISHED
+}
+
+model InviteToken {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  role      Role     @default(EDITOR)
+  token     String   @unique
+  expiresAt DateTime
+  createdBy String?
+  createdAt DateTime @default(now())
+
+  @@index([email])
+}
+
+model VerificationToken {
+  // identifier = email
+  identifier String
+  token      String   @unique
+  expiresAt  DateTime
+  createdAt  DateTime @default(now())
+
+  @@id([identifier, token])
+}
+
+model PasswordResetToken {
+  id        String   @id @default(cuid())
+  userId    String   @unique
+  user      User     @relation(fields: [userId], references: [id])
+  token     String   @unique
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+}

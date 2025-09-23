@@ -1,0 +1,42 @@
+
+services:
+  postgres:
+    image: postgres:latest
+    container_name: azure_postgres
+    env_file:
+      - .env
+    environment:
+      POSTGRES_USER: ${DB_USER}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+      POSTGRES_DB: ${DB_NAME}
+    ports:
+      - "${DB_PORT}:5432"
+    volumes:
+      - azure_postgres_data:/var/lib/postgresql/data
+    networks:
+      - azure_network
+
+  adminer:
+    image: adminer:latest
+    container_name: azure_adminer
+    ports:
+      - "8081:8080"
+    networks:
+      - azure_network
+
+  smtp:
+    image: rnwood/smtp4dev
+    container_name: azure_smtp
+    env_file:
+      - .env
+    restart: unless-stopped
+    ports:
+      - "8026:80"   # Web UI
+      - "${SMTP_PORT}:25"   # SMTP
+
+volumes:
+  azure_postgres_data:
+
+networks:
+  azure_network:
+    driver: bridge
