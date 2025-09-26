@@ -53,3 +53,14 @@ export const login = async (req, res) => {
     res.status(500).json({ error: "An unexpected error occurred." });
   }
 };
+
+
+export const getProfile = async (req, res) => {
+	try {
+		const {password: _, ...userProfile } = req.user;
+		res.status(200).json({ user: userProfile })
+	} catch (error) {
+		console.error("Profile Error:", error);
+    res.status(500).json({ error: "An unexpected error occurred." })
+	}
+}
