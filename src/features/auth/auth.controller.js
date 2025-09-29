@@ -1,33 +1,34 @@
-import { findUserByEmail, createUser, loginUser } from "./auth.service.js";
+import { findUserByEmail, createUser, loginUser, registerUserWithInvite } from "./auth.service.js";
 
 export const register = async (req, res) => {
   try {
-    const { email, password, name } = req.body;
+    const { invite, name, password } = req.body;
+		const token = invite;
 
-    if (!email || !password) {
+    if (!token || !name || !password) {
       return res
         .status(400)
-        .json({ error: "Email and password are required." });
+        .json({ error: "Token, name, and password are required." });
     }
 
-    const existingUser = await findUserByEmail(email);
-    if (existingUser) {
+    if (password.length < 6) {
       return res
-        .status(409)
-        .json({ error: "A user with this email already exists." });
+        .status(400)
+        .json({ error: "Password must be at least 6 characters long." });
     }
 
-    const newUser = await createUser(email, password, name);
+    const newUser = await registerUserWithInvite({ token, name, password });
 
     // Don't send the password back in the response
     const { password: _, ...userToSend } = newUser;
 
     res
       .status(201)
-      .json({ message: "User created successfully", user: userToSend });
+      .json({ message: "User registered successfully", user: userToSend });
   } catch (error) {
     console.error("Registration Error:", error);
-    res.status(500).json({ error: "An unexpected error occurred." });
+    // Send a more generic error message to the client
+    res.status(400).json({ error: error.message || "Registration failed." });
   }
 };
 

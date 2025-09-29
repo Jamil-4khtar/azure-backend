@@ -1,6 +1,6 @@
-import prisma from '../../config/db.js';
-import bcrypt from 'bcryptjs';
-import { generateAuthToken } from '../../utils/tokens.js';
+import prisma from "../../config/db.js";
+import bcrypt from "bcryptjs";
+import { generateAuthToken } from "../../utils/tokens.js";
 
 /**
  * Finds a user by their email address.
@@ -28,9 +28,70 @@ export const createUser = async (email, password, name) => {
       password: hashedPassword,
       name,
       // You can set default values like role here if needed
-      // role: 'EDITOR' 
+      // role: 'EDITOR'
     },
   });
+};
+
+/**
+ * Creates a new user from an invitation token.
+ * @param {string} token - The invitation token.
+ * @param {string} name - The user's full name.
+ * @param {string} password - The user's chosen password.
+ * @returns {Promise<User>} The created user object.
+ */
+export const registerUserWithInvite = async ({ token, name, password }) => {
+  // 1. Find the invitation token
+  const inviteToken = await prisma.inviteToken.findUnique({
+    where: { token },
+  });
+
+  // 2. Validate the token
+  if (!inviteToken) {
+    throw new Error("Invalid or expired invitation token.");
+  }
+
+  if (new Date() > new Date(inviteToken.expiresAt)) {
+    // Clean up expired token
+    await prisma.inviteToken.delete({ where: { id: inviteToken.id } });
+    throw new Error("Invalid or expired invitation token.");
+  }
+
+  // 3. Check if a user with this email already exists
+  const existingUser = await prisma.user.findUnique({
+    where: { email: inviteToken.email },
+  });
+
+  if (existingUser) {
+    // If the user exists, the token is invalid and should be deleted
+    await prisma.inviteToken.delete({ where: { id: inviteToken.id } });
+    throw new Error("A user with this email already exists.");
+  }
+
+  // 4. Hash the password
+  const hashedPassword = await bcrypt.hash(password, 10);
+
+  // 5. Create user and delete token in a transaction
+  const newUser = await prisma.$transaction(async (tx) => {
+    const user = await tx.user.create({
+      data: {
+        email: inviteToken.email,
+        name,
+        password: hashedPassword,
+        role: inviteToken.role, // Assign role from the token
+        emailVerified: new Date(), // Mark email as verified
+      },
+    });
+
+    // Delete the token so it can't be used again
+    await tx.inviteToken.delete({
+      where: { id: inviteToken.id },
+    });
+
+    return user;
+  });
+
+  return newUser;
 };
 
 /**
@@ -54,7 +115,7 @@ export const loginUser = async (email, password) => {
 
   // Exclude password from the returned user object
   const { password: _, ...userWithoutPassword } = user;
-  
+
   const token = generateAuthToken(userWithoutPassword);
 
   return { user: userWithoutPassword, token };
