@@ -22,4 +22,4 @@ async function seedUsers() {
   console.log("✅ Seeded admin:", email);
 }
 
-export default seedUsers
+export default seedUsers;

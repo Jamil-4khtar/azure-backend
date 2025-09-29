@@ -4,6 +4,8 @@ import prisma from '../config/db.js';
 export const isAdmin = async (req, res, next) => {
   const token = req.headers.authorization?.split(' ')[1];
 
+	// console.log("Is there token", token)
+
   if (!token) {
     return res.status(401).json({ error: 'Access denied. No token provided.' });
   }
