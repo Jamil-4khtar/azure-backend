@@ -44,7 +44,7 @@ export const requestPasswordReset = async (email) => {
       },
     });
 
-    const resetLink = `http://localhost:3000/reset-password?token=${token}`;
+    const resetLink = `${process.env.DASHBOARD_URL}/reset-password?token=${token}`;
     const emailHtml = createResetPasswordEmail(resetLink);
 
     await sendMail(email, "Reset Your Password", emailHtml);
@@ -92,7 +92,7 @@ export const resendResetEmail = async (email) => {
     data: { createdAt: now },
   });
 
-  const resetLink = `http://localhost:3000/reset-password?token=${tokenRow.token}`;
+  const resetLink = `${process.env.DASHBOARD_URL}/reset-password?token=${tokenRow.token}`;
   const emailHtml = createResetPasswordEmail(resetLink);
   await sendMail(email, "Reset Your Password", emailHtml);
 
