@@ -1,13 +1,46 @@
 {
   "name": "azure-backend",
   "version": "1.0.0",
-  "description": "",
-  "main": "server.js",
+  "description": "Azure Backend API Server",
+  "main": "src/app.js",
   "scripts": {
-    "start": "nodemon src/app.js"
+    "start": "node src/app.js",
+    "dev": "nodemon src/app.js",
+    "dev:debug": "nodemon --inspect src/app.js",
+    "db:generate": "prisma generate",
+    "db:push": "prisma db push",
+    "db:migrate": "prisma migrate dev",
+    "db:migrate:deploy": "prisma migrate deploy",
+    "db:migrate:reset": "prisma migrate reset",
+    "db:seed": "node prisma/seed.js",
+    "db:studio": "prisma studio",
+    "db:format": "prisma format",
+    "docker:up": "docker-compose up -d",
+    "docker:down": "docker-compose down",
+    "docker:logs": "docker-compose logs -f",
+    "docker:build": "docker-compose build",
+    "docker:restart": "docker-compose restart",
+    "lint": "echo 'Linting not configured yet'",
+    "lint:fix": "echo 'Linting not configured yet'",
+    "format": "echo 'Formatting not configured yet'",
+    "test": "echo 'Tests not configured yet'",
+    "test:watch": "echo 'Tests not configured yet'",
+    "test:coverage": "echo 'Tests not configured yet'",
+    "build": "echo 'Build process for production'",
+    "validate": "npm run db:generate && node -e \"require('./src/config/env.js').validateEnv(); console.log('✅ All validations passed')\"",
+    "setup": "npm install && npm run db:generate && npm run db:push && npm run db:seed",
+    "reset": "npm run db:migrate:reset && npm run db:seed",
+    "fresh": "npm run docker:down && npm run docker:up && sleep 5 && npm run setup"
   },
-  "keywords": [],
-  "author": "",
+  "keywords": [
+    "backend",
+    "api",
+    "nodejs",
+    "express",
+    "prisma",
+    "postgresql"
+  ],
+  "author": "Jamil Akhtar",
   "license": "ISC",
   "type": "module",
   "dependencies": {
@@ -21,9 +54,14 @@
     "joi": "^18.0.1",
     "jsonwebtoken": "^9.0.2",
     "nodemailer": "^7.0.6",
-    "pg": "^8.16.3"
+    "pg": "^8.16.3",
+    "uuid": "^13.0.0",
+    "winston": "^3.18.3",
+    "winston-daily-rotate-file": "^5.0.0"
   },
   "devDependencies": {
+    "chalk": "^5.6.2",
+    "nodemon": "^3.1.10",
     "prisma": "^6.16.2"
   }
 }
