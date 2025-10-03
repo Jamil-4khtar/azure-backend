@@ -2,8 +2,7 @@ import { findUserByEmail, createUser, loginUser, registerUserWithInvite } from "
 
 export const register = async (req, res) => {
   try {
-    const { invite, name, password } = req.body;
-		const token = invite;
+    const { token, name, password } = req.body;
 
     if (!token || !name || !password) {
       return res

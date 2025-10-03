@@ -17,10 +17,10 @@ import userRoutes from "./features/users/index.js";
 import helmet from "helmet";
 import { globalLimiter } from "./middleware/rateLimiter.js";
 import {
-	globalErrorHandler,
+  globalErrorHandler,
   handleUncaughtException,
   handleUnhandledRejection,
-	notFoundHandler,
+  notFoundHandler,
 } from "./middleware/errorHandler.js";
 import { successResponse } from "./utils/response.js";
 
