@@ -41,7 +41,7 @@ const nameSchema = Joi.string()
 
 // Registration validation schema
 export const registerSchema = Joi.object({
-  invite: Joi.string().trim().required(),
+  token: Joi.string().trim().required(),
   name: nameSchema,
   password: passwordSchema
 });
