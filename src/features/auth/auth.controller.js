@@ -1,5 +1,4 @@
 import { asyncHandler } from "../../utils/asyncHandler.js";
-import { AuthenticationError } from "../../utils/errors.js";
 import { successResponse } from "../../utils/response.js";
 import { loginUser, registerUserWithInvite } from "./auth.service.js";
 

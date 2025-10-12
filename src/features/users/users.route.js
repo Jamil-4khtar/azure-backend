@@ -1,31 +1,30 @@
 import express from 'express';
-import * as userController from './users.controller.js';
 import { isAdmin } from '../../middleware/isAdmin.js';
-// import { authenticateToken, requireAdmin } from '../../middleware/auth.js';
+import { createUser, deleteUser, getAllUsers, getUserById, getUserStats, toggleUserStatus, updateUser } from './users.controller.js'
 
 const router = express.Router();
 
 router.use(isAdmin);
 
 // Get all users (with pagination and filtering)
-router.get('/', userController.getAllUsers);
+router.get('/', getAllUsers);
 
 // Get user statistics
-router.get('/stats', userController.getUserStats);
+router.get('/stats', getUserStats);
 
 // Get user by ID
-router.get('/:id', userController.getUserById);
+router.get('/:id', getUserById);
 
 // Create new user
-router.post('/', userController.createUser);
+router.post('/', createUser);
 
 // Update user
-router.put('/:id', userController.updateUser);
+router.put('/:id', updateUser);
 
 // Delete user
-router.delete('/:id', userController.deleteUser);
+router.delete('/:id', deleteUser);
 
 // Toggle user status
-router.patch('/:id/toggle-status', userController.toggleUserStatus);
+router.patch('/:id/toggle-status', toggleUserStatus);
 
 export default router;

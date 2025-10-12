@@ -45,20 +45,14 @@ export function noContentResponse(res) {
  * Paginated response helper
  */
 export function paginatedResponse(res, data, pagination, message = 'Success') {
+	
   const response = {
     success: true,
     message,
     timestamp: new Date().toISOString(),
     requestId: res.req?.id,
     data,
-    pagination: {
-      page: pagination.page,
-      limit: pagination.limit,
-      total: pagination.total,
-      totalPages: Math.ceil(pagination.total / pagination.limit),
-      hasNext: pagination.page < Math.ceil(pagination.total / pagination.limit),
-      hasPrev: pagination.page > 1
-    }
+		pagination
   };
   
   logger.debug('Paginated response sent', {

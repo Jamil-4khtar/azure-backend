@@ -1,5 +1,6 @@
 import prisma from "../../config/db.js";
 import bcrypt from "bcryptjs";
+import { notFoundHandler } from "../../middleware/errorHandler.js";
 
 /* 
 Get all users
@@ -70,44 +71,6 @@ export const getUserById = async (id) => {
 };
 
 
-// Create new user
-export const createUser = async (userData) => {
-  const { email, password, name, role = 'EDITOR' } = userData;
-  
-  // Check if user already exists
-  const existingUser = await prisma.user.findUnique({
-    where: { email }
-  });
-  
-  if (existingUser) {
-    throw new Error('User with this email already exists');
-  }
-  
-  // Hash password
-  const hashedPassword = await bcrypt.hash(password, 12);
-  
-  // Create user
-  const newUser = await prisma.user.create({
-    data: {
-      email,
-      password: hashedPassword,
-      name,
-      role,
-      isActive: true
-    },
-    select: {
-      id: true,
-      name: true,
-      email: true,
-      role: true,
-      isActive: true,
-      createdAt: true
-    }
-  });
-  
-  return newUser;
-};
-
 // Update user
 export const updateUser = async (id, updateData) => {
   const { password, ...otherData } = updateData;
@@ -120,7 +83,6 @@ export const updateUser = async (id, updateData) => {
     dataToUpdate.password = await bcrypt.hash(password, 12);
   }
   
-  try {
     const updatedUser = await prisma.user.update({
       where: { id },
       data: dataToUpdate,
@@ -135,12 +97,7 @@ export const updateUser = async (id, updateData) => {
     });
     
     return updatedUser;
-  } catch (error) {
-    if (error.code === 'P2025') {
-      return null; // User not found
-    }
-    throw error;
-  }
+
 };
 
 
@@ -161,13 +118,12 @@ export const deleteUser = async (id) => {
 
 // Toggle user status
 export const toggleUserStatus = async (id) => {
-  try {
     const user = await prisma.user.findUnique({
       where: { id },
       select: { isActive: true }
     });
     
-    if (!user) return null;
+    if (!user) throw new notFoundHandler("User not found");
     
     const updatedUser = await prisma.user.update({
       where: { id },
@@ -184,9 +140,7 @@ export const toggleUserStatus = async (id) => {
     });
     
     return updatedUser;
-  } catch (error) {
-    throw error;
-  }
+
 };
 
 // Get user statistics
