@@ -1,4 +1,5 @@
 import Joi from 'joi';
+import { ValidationError } from '../utils/errors.js';
 
 // Strong password schema
 const passwordSchema = Joi.string()
@@ -49,7 +50,8 @@ export const registerSchema = Joi.object({
 // Login validation schema
 export const loginSchema = Joi.object({
   email: emailSchema,
-  password: Joi.string().required()
+  // password: passwordSchema
+  password: Joi.string().min(6).required()
 });
 
 // Password reset schemas
@@ -71,15 +73,15 @@ export const validate = (schema) => {
     });
 
     if (error) {
-      const errors = error.details.map(detail => ({
-        field: detail.path.join('.'),
-        message: detail.message
-      }));
+			console.log(error)
+      // const errors = error.details.map(detail => ({
+      //   field: detail.path.join('.'),
+      //   message: detail.message
+      // }));
+			const errorMsg = error.details[0].message
 
-      return res.status(400).json({
-        error: 'Validation failed',
-        details: errors
-      });
+			return next(new ValidationError(errorMsg))
+			
     }
 
     // Replace req.body with validated/cleaned value

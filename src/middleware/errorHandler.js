@@ -79,15 +79,6 @@ function handleProductionError(error) {
 }
 
 /**
- * Handle async errors (wrap async functions)
- */
-export function asyncHandler(fn) {
-  return (req, res, next) => {
-    Promise.resolve(fn(req, res, next)).catch(next);
-  };
-}
-
-/**
  * Handle 404 errors
  */
 export function notFoundHandler(req, res, next) {

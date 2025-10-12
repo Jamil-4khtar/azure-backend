@@ -1,45 +1,14 @@
 import prisma from "../../config/db.js";
 import bcrypt from "bcryptjs";
 import { generateAuthToken } from "../../utils/tokens.js";
+import { AuthenticationError } from "../../utils/errors.js";
 
-/**
- * Finds a user by their email address.
- * @param {string} email - The user's email.
- * @returns {Promise<User|null>} The user object or null if not found.
- */
 export const findUserByEmail = async (email) => {
   return await prisma.user.findUnique({
     where: { email: email.toLowerCase() },
   });
 };
 
-/**
- * Creates a new user in the database.
- * @param {string} email - The user's email.
- * @param {string} password - The user's password.
- * @param {string} name - The user's name.
- * @returns {Promise<User>} The created user object.
- */
-export const createUser = async (email, password, name) => {
-  const hashedPassword = await bcrypt.hash(password, 10);
-  return await prisma.user.create({
-    data: {
-      email: email.toLowerCase(),
-      password: hashedPassword,
-      name,
-      // You can set default values like role here if needed
-      // role: 'EDITOR'
-    },
-  });
-};
-
-/**
- * Creates a new user from an invitation token.
- * @param {string} token - The invitation token.
- * @param {string} name - The user's full name.
- * @param {string} password - The user's chosen password.
- * @returns {Promise<User>} The created user object.
- */
 export const registerUserWithInvite = async ({ token, name, password }) => {
   // 1. Find the invitation token
   const inviteToken = await prisma.inviteToken.findUnique({
@@ -48,13 +17,13 @@ export const registerUserWithInvite = async ({ token, name, password }) => {
 
   // 2. Validate the token
   if (!inviteToken) {
-    throw new Error("Invalid or expired invitation token.");
+    throw new AuthenticationError("Invalid or expired invitation token.");
   }
 
   if (new Date() > new Date(inviteToken.expiresAt)) {
     // Clean up expired token
     await prisma.inviteToken.delete({ where: { id: inviteToken.id } });
-    throw new Error("Invalid or expired invitation token.");
+    throw new AuthenticationError("Invalid or expired invitation token.");
   }
 
   // 3. Check if a user with this email already exists
@@ -65,7 +34,7 @@ export const registerUserWithInvite = async ({ token, name, password }) => {
   if (existingUser) {
     // If the user exists, the token is invalid and should be deleted
     await prisma.inviteToken.delete({ where: { id: inviteToken.id } });
-    throw new Error("A user with this email already exists.");
+    throw new AuthenticationError("A user with this email already exists.");
   }
 
   // 4. Hash the password
@@ -94,23 +63,17 @@ export const registerUserWithInvite = async ({ token, name, password }) => {
   return newUser;
 };
 
-/**
- * Attempts to log in a user with email and password.
- * @param {string} email - The user's email.
- * @param {string} password - The user's password.
- * @returns {Promise<{user: object, token: string}|null>} An object with user data and a token, or null if login fails.
- */
 export const loginUser = async (email, password) => {
   const user = await findUserByEmail(email);
 
   if (!user) {
-    return null; // User not found
+    throw new AuthenticationError("Invalid email or password");
   }
 
   const isPasswordValid = await bcrypt.compare(password, user.password);
 
   if (!isPasswordValid) {
-    return null; // Invalid password
+    throw new AuthenticationError("Invalid email or password");
   }
 
   // Exclude password from the returned user object
