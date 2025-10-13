@@ -1,6 +1,6 @@
 import express from 'express';
 import { isAdmin } from '../../middleware/isAdmin.js';
-import { createUser, deleteUser, getAllUsers, getUserById, getUserStats, toggleUserStatus, updateUser } from './users.controller.js'
+import { deleteUser, getAllUsers, getUserById, getUserStats, toggleUserStatus, updateUser } from './users.controller.js'
 
 const router = express.Router();
 
@@ -14,9 +14,6 @@ router.get('/stats', getUserStats);
 
 // Get user by ID
 router.get('/:id', getUserById);
-
-// Create new user
-router.post('/', createUser);
 
 // Update user
 router.put('/:id', updateUser);

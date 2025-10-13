@@ -33,7 +33,6 @@ export const getUserById = asyncHandler(async (req, res) => {
   if (!user) {
     throw new NotFoundError("User not found");
   }
-
   return successResponse(res, user);
 });
 
