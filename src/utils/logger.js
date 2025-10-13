@@ -47,7 +47,7 @@ const transports = [];
 transports.push(
   new winston.transports.Console({
     format: process.env.NODE_ENV === 'production' ? productionFormat : developmentFormat,
-    level: process.env.LOG_LEVEL || 'info'
+    level: process.env.LOG_LEVEL || 'http'
   })
 );
 
@@ -138,7 +138,6 @@ logger.logRequest = function(req, res, duration) {
     contentLength: res.get('Content-Length') || 0,
     requestId: req.id || 'unknown'
   };
-
   const message = `${req.method} ${req.originalUrl || req.url} ${res.statusCode} - ${duration}ms`;
   
   // Use different log levels based on status code
@@ -152,7 +151,7 @@ logger.logRequest = function(req, res, duration) {
 };
 
 logger.logError = function(error, req = null, additional = {}) {
-  const meta = {
+  const meta = {	
     error: {
       name: error.name,
       message: error.message,

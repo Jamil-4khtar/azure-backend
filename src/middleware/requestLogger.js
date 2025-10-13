@@ -13,44 +13,33 @@ export function requestId(req, res, next) {
 /**
  * HTTP request logging middleware
  */
-export function requestLogger(req, res, next) {
+export const requestLogger = (req, res, next) => {
   const start = Date.now();
-  
-  // Log incoming request (only in debug mode to avoid spam)
-  logger.debug(`Incoming request`, {
+
+  logger.debug("Incoming request", {
     requestId: req.id,
     method: req.method,
-    url: req.originalUrl,
+    url: req.url,
     ip: req.ip,
-    userAgent: req.get('User-Agent'),
-    contentType: req.get('Content-Type'),
-    contentLength: req.get('Content-Length'),
+    userAgent: req.get("user-agent"),
+    contentType: req.get("content-type"),
+    contentLength: req.get("content-length"),
+    params: req.params,
+    query: req.query,
   });
 
-  // Override res.end to capture response time
   const originalEnd = res.end;
-  res.end = function(chunk, encoding) {
+
+  res.end = function (chunk, encoding) {
     const duration = Date.now() - start;
     
-    // Log completed request
+    // Log BEFORE ending response
     logger.logRequest(req, res, duration);
     
-    // Call original end method
-    originalEnd.call(res, chunk, encoding);
+    // Restore and call original
+    res.end = originalEnd;
+    res.end(chunk, encoding);
   };
 
   next();
-}
-
-/**
- * Error logging middleware
- */
-export function errorLogger(err, req, res, next) {
-  // Log the error with request context
-  logger.logError(err, req, {
-    timestamp: new Date().toISOString(),
-    requestId: req.id,
-  });
-
-  next(err);
-}
+};

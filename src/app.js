@@ -5,7 +5,7 @@ import { getConfig } from "./config/env.js";
 import {
   requestId,
   requestLogger,
-  errorLogger,
+  // errorLogger,
 } from "./middleware/requestLogger.js";
 import logger from "./utils/logger.js";
 import authRoutes from "./features/auth/index.js";
@@ -121,9 +121,6 @@ app.get("/", (req, res) => {
 
   return successResponse(res, rootData, "Server is running");
 });
-
-// Add error logging middleware (before error handlers)
-app.use(errorLogger);
 
 // Handle 404 routes
 app.use(notFoundHandler);
