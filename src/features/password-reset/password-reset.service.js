@@ -4,6 +4,7 @@ import { sendMail } from "../../services/mail.service.js";
 import { createResetPasswordEmail } from "./password-reset.email.js";
 import { findUserByEmail } from "../auth/auth.service.js";
 import bcrypt from "bcryptjs";
+import config from "../../config/env.js";
 
 
 
@@ -16,10 +17,7 @@ const ROTATE_AFTER_MINUTES = 15;
 const ms = (seconds) => seconds * 1000;
 const minutes = (mins) => mins * 60 * 1000;
 
-/**
- * Creates a password reset token and sends the reset email.
- * @param {string} email - The user's email address.
- */
+
 
 export const requestPasswordReset = async (email) => {
   const user = await findUserByEmail(email);
@@ -46,7 +44,7 @@ export const requestPasswordReset = async (email) => {
       },
     });
 
-    const resetLink = `${process.env.DASHBOARD_URL}/reset-password?token=${token}`;
+    const resetLink = `${config.cors.dashboardUrl}/reset-password?token=${token}`;
     const emailHtml = createResetPasswordEmail(resetLink);
 
     await sendMail(email, "Reset Your Password", emailHtml);
@@ -54,12 +52,7 @@ export const requestPasswordReset = async (email) => {
   // No return value is needed as we always respond with success.
 };
 
-// --- NEW FUNCTION: RESEND RESET EMAIL ---
-/**
- * Handles the logic for resending a password reset email, including cooldowns.
- * @param {string} email - The user's email address.
- * @returns {Promise<{resent: boolean, cooldownMsLeft: number}>}
- */
+
 export const resendResetEmail = async (email) => {
   const user = await findUserByEmail(email);
   if (!user) {
@@ -94,20 +87,14 @@ export const resendResetEmail = async (email) => {
     data: { createdAt: now },
   });
 
-  const resetLink = `${process.env.DASHBOARD_URL}/reset-password?token=${tokenRow.token}`;
+  const resetLink = `${config.cors.dashboardUrl}/reset-password?token=${tokenRow.token}`;
   const emailHtml = createResetPasswordEmail(resetLink);
   await sendMail(email, "Reset Your Password", emailHtml);
 
   return { resent: true, cooldownMsLeft: cooldownMs };
 };
 
-// --- NEW FUNCTION: RESET PASSWORD ---
-/**
- * Verifies a token and updates the user's password.
- * @param {string} token - The password reset token.
- * @param {string} password - The new password.
- * @returns {Promise<boolean>} True if successful, false otherwise.
- */
+
 export const resetPassword = async (token, password) => {
   const tokenRecord = await prisma.passwordResetToken.findUnique({
     where: { token },

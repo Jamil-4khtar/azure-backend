@@ -5,14 +5,13 @@
   "main": "src/app.js",
   "scripts": {
     "start": "node src/app.js",
-    "dev": "nodemon src/app.js",
-    "dev:debug": "nodemon --inspect src/app.js",
+    "dev": "dotenv -e .env.development -- nodemon src/app.js",
+    "dev:debug": "dotenv -e .env.development -- nodemon --inspect src/app.js",
+    "start:prod": "dotenv -e .env.production -- node src/app.js",
     "db:generate": "prisma generate",
-    "db:push": "prisma db push",
-    "db:migrate": "prisma migrate dev",
-    "db:migrate:deploy": "prisma migrate deploy",
-    "db:migrate:reset": "prisma migrate reset",
-    "db:seed": "node prisma/seed.js",
+    "db:push": "dotenv -e .env.development -- prisma db push",
+    "db:migrate": "dotenv -e .env.development -- prisma migrate dev",
+    "db:seed": "dotenv -e .env.development -- node prisma/seed.js",
     "db:studio": "prisma studio",
     "db:format": "prisma format",
     "docker:up": "docker-compose up -d",
@@ -27,9 +26,9 @@
     "test:watch": "echo 'Tests not configured yet'",
     "test:coverage": "echo 'Tests not configured yet'",
     "build": "echo 'Build process for production'",
-    "validate": "npm run db:generate && node -e \"require('./src/config/env.js').validateEnv(); console.log('✅ All validations passed')\"",
+    "validate": "dotenv -e .env.development -- node -e \"require('./src/config/env.js').validateEnv(); console.log('✅ All validations passed')\"",
     "setup": "npm install && npm run db:generate && npm run db:push && npm run db:seed",
-    "reset": "npm run db:migrate:reset && npm run db:seed",
+    "reset": "dotenv -e .env.development -- prisma migrate reset && dotenv -e .env.development -- node prisma/seed.js",
     "fresh": "npm run docker:down && npm run docker:up && sleep 5 && npm run setup"
   },
   "keywords": [
@@ -61,6 +60,7 @@
   },
   "devDependencies": {
     "chalk": "^5.6.2",
+    "dotenv-cli": "^10.0.0",
     "nodemon": "^3.1.10",
     "prisma": "^6.16.2"
   }

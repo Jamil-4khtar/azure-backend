@@ -1,5 +1,8 @@
 import Joi from 'joi';
 
+// The env.js file validates your environment variables right at the start. If anything is missing or incorrect (like a database password that's too short), the application will refuse to start and will tell you exactly what's wrong. This is called "failing fast," and it's a best practice that saves you a lot of time.
+
+
 // Define the schema for environment variables
 const envSchema = Joi.object({
   // Database Configuration
@@ -8,10 +11,6 @@ const envSchema = Joi.object({
   DB_NAME: Joi.string().required(),
   DB_HOST: Joi.string().required(),
   DB_PORT_HOST: Joi.number().port().required(),
-  DATABASE_URL_LOCAL: Joi.string().uri().required(),
-  DB_HOST_DOCKER: Joi.string().required(),
-  DB_PORT_DOCKER: Joi.number().port().required(),
-  DATABASE_URL_DOCKER: Joi.string().uri().required(),
   DATABASE_URL: Joi.string().uri().required(),
   DB_PORT: Joi.number().port().required(),
 
@@ -35,32 +34,21 @@ const envSchema = Joi.object({
   SMTP_HOST: Joi.string().required(),
   SMTP_PORT: Joi.number().port().required(),
   SMTP_SECURE: Joi.boolean().required(),
-  // MAIL_FROM: Joi.string().email().required(),
   MAIL_FROM: Joi.string().required(),
 }).unknown(true);
 
-export function validateEnv() {
-  const { error, value } = envSchema.validate(process.env, {
+function validateAndGetConfig() {
+  const { error, value: env } = envSchema.validate(process.env, {
     abortEarly: false,
     stripUnknown: false,
   });
 
   if (error) {
-    const errorMessages = error.details.map(detail => {
-      const key = detail.context.key;
-      const message = detail.message;
-      return `${key}: ${message}`;
-    }).join('\n');
-
+    const errorMessages = error.details.map(detail => `${detail.context.key}: ${detail.message}`).join('\n');
     throw new Error(`Environment validation failed:\n${errorMessages}`);
   }
 
-  return value;
-}
-
-export function getConfig() {
-  const env = validateEnv();
-  
+  // Build the structured config object
   return {
     database: {
       url: env.DATABASE_URL,
@@ -94,3 +82,9 @@ export function getConfig() {
     },
   };
 }
+
+// Create the config object ONCE and export it
+const config = validateAndGetConfig();
+
+
+export default config;

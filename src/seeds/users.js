@@ -1,10 +1,11 @@
 import { PrismaClient } from "@prisma/client";
 import bcrypt from "bcryptjs";
+import config from "../config/env.js";
 
 const prisma = new PrismaClient();
 
-const email = process.env.SEED_ADMIN_EMAIL || "admin@admin.com";
-const password = process.env.SEED_ADMIN_PASSWORD || "admin123";
+const email = config.admin.email || "admin@admin.com";
+const password = config.admin.password || "admin123";
 const hash = await bcrypt.hash(password, 10);
 
 async function seedUsers() {

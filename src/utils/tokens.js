@@ -1,4 +1,5 @@
 import jwt from 'jsonwebtoken';
+import config from '../config/env.js';
 
 // Function to generate a JWT
 export function generateAuthToken(user) {
@@ -8,7 +9,7 @@ export function generateAuthToken(user) {
     role: user.role,
   };
 
-  return jwt.sign(payload, process.env.JWT_SECRET, {
-    expiresIn: '7d', // Token expires in 7 days
+  return jwt.sign(payload, config.jwt.secret, {
+    expiresIn: config.jwt.expiresIn, // Token expires in 7 days
   });
 }

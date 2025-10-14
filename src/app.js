@@ -1,12 +1,8 @@
 import cors from "cors";
 import express from "express";
 import "dotenv/config.js";
-import { getConfig } from "./config/env.js";
-import {
-  requestId,
-  requestLogger,
-  // errorLogger,
-} from "./middleware/requestLogger.js";
+import config from "./config/env.js";
+import { requestId, requestLogger } from "./middleware/requestLogger.js";
 import logger from "./utils/logger.js";
 import authRoutes from "./features/auth/index.js";
 import inviteRoutes from "./features/invite/index.js";
@@ -27,22 +23,13 @@ import { successResponse } from "./utils/response.js";
 handleUncaughtException();
 handleUnhandledRejection();
 
-// Validate environment variables at startup
-let config;
-try {
-  config = getConfig();
+if (config.server.nodeEnv === "production") {
   logger.info("Environment validation passed", {
     environment: config.server.nodeEnv,
     database: `${config.database.host}:${config.database.port}`,
     port: config.server.port,
-    logLevel: process.env.LOG_LEVEL || "info",
+    logLevel: config.server.logLevel || "info",
   });
-} catch (error) {
-  logger.error("Environment validation failed", {
-    error: error.message,
-    stack: error.stack,
-  });
-  process.exit(1);
 }
 
 const app = express();
@@ -87,14 +74,13 @@ app.get("/health", (req, res) => {
     status: "healthy",
     timestamp: new Date().toISOString(),
     environment: config.server.nodeEnv,
-    version: process.env.npm_package_version || "1.0.0",
+    version: process.env.npm_package_version || "1.0.0", // This one is fine to leave as is
     uptime: process.uptime(),
     memory: {
       used: Math.round(process.memoryUsage().heapUsed / 1024 / 1024) + "MB",
       total: Math.round(process.memoryUsage().heapTotal / 1024 / 1024) + "MB",
     },
   };
-
   return successResponse(res, healthData, "Health check passed");
 });
 
@@ -112,13 +98,12 @@ app.get("/", (req, res) => {
     message: "Azure Backend Server is running!",
     environment: config.server.nodeEnv,
     timestamp: new Date().toISOString(),
-    version: process.env.npm_package_version || "1.0.0",
+    version: process.env.npm_package_version || "1.0.0", // Also fine to leave
     endpoints: {
       health: "/health",
       api: "/api",
     },
   };
-
   return successResponse(res, rootData, "Server is running");
 });
 
@@ -141,11 +126,19 @@ process.on("SIGINT", () => {
 
 // Start server
 app.listen(config.server.port, () => {
-  logger.info("🚀 Azure Backend Server Started Successfully", {
-    port: config.server.port,
-    environment: config.server.nodeEnv,
-    healthCheck: `http://localhost:${config.server.port}/health`,
-    apiBase: `http://localhost:${config.server.port}/api`,
-    logLevel: process.env.LOG_LEVEL || "info",
-  });
+  // For development, a simpler message is better
+  if (config.server.nodeEnv !== "production") {
+    logger.info("Server is listening on", {
+      url: `http://localhost:${config.server.port}`,
+    });
+  } else {
+    // The detailed log for production
+    logger.info("🚀 Azure Backend Server Started Successfully", {
+      port: config.server.port,
+      environment: config.server.nodeEnv,
+      healthCheck: `http://localhost:${config.server.port}/health`,
+      apiBase: `http://localhost:${config.server.port}/api`,
+      logLevel: config.server.logLevel || "info",
+    });
+  }
 });

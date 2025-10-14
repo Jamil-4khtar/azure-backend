@@ -1,9 +1,10 @@
 import nodemailer from 'nodemailer';
+import config from '../config/env.js';
 
 const transporter = nodemailer.createTransport({
-  host: process.env.SMTP_HOST,
-  port: parseInt(process.env.SMTP_PORT || '1025', 10),
-  secure: process.env.SMTP_SECURE === 'true', // true for 465, false for other ports
+  host: config.smtp.host,
+  port: config.smtp.port,
+  secure: config.smtp.secure,
 });
 
 /**
@@ -14,7 +15,7 @@ const transporter = nodemailer.createTransport({
  */
 export const sendMail = async (to, subject, html) => {
   const mailOptions = {
-    from: process.env.MAIL_FROM || '"Your App Name" <noreply@example.com>',
+    from: config.smtp.from || '"Your App Name" <noreply@example.com>',
     to,
     subject,
     html,
