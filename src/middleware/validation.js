@@ -73,11 +73,6 @@ export const validate = (schema) => {
     });
 
     if (error) {
-			console.log(error)
-      // const errors = error.details.map(detail => ({
-      //   field: detail.path.join('.'),
-      //   message: detail.message
-      // }));
 			const errorMsg = error.details[0].message
 
 			return next(new ValidationError(errorMsg))
