@@ -27,7 +27,7 @@
     "test:coverage": "echo 'Tests not configured yet'",
     "build": "echo 'Build process for production'",
     "validate": "dotenv -e .env.development -- node -e \"require('./src/config/env.js').validateEnv(); console.log('✅ All validations passed')\"",
-    "setup": "npm install && npm run db:generate && npm run db:push && npm run db:seed",
+    "setup:dev": "node scripts/dev-setup.js",
     "reset": "dotenv -e .env.development -- prisma migrate reset && dotenv -e .env.development -- node prisma/seed.js",
     "fresh": "npm run docker:down && npm run docker:up && sleep 5 && npm run setup"
   },

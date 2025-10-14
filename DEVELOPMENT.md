@@ -1,59 +1,88 @@
-# Development Guide 🚀
+# Development Guide
 
-This guide provides instructions for setting up and running this project.
+This document provides a deeper dive into the development practices, conventions, and architecture of the Azure Backend project.
 
----
+## Table of Contents
 
-## Quick Start
+- [Development Guide](#development-guide)
+	- [Table of Contents](#table-of-contents)
+	- [Project Structure](#project-structure)
+	- [Environment Variables](#environment-variables)
+	- [Database Management with Prisma](#database-management-with-prisma)
+		- [Migrations](#migrations)
+		- [Seeding](#seeding)
+		- [Resetting the Database](#resetting-the-database)
+	- [Logging](#logging)
 
-Get your development environment up and running in two simple steps.
+## Project Structure
 
-### First-Time Setup
+The project follows a standard structure for Node.js applications:
 
-1.  **Create your environment file:** Copy the example file to create your local configuration.
-    ```bash
-    cp .env.example .env
-    ```
-    Afterward, be sure to edit the `.env` file with your actual values.
-
-2.  **Run the initial setup script:** This command will install dependencies and prepare the database.
-3. 
-    ```bash
-    npm run setup
-    ```
-
-### Daily Development
-
-To start the local development server for daily work, run the following command:
-
-```bash
-npm run dev
+```
+azure-backend/
+├── prisma/
+│   ├── migrations/         # Database migration history
+│   ├── schema.prisma       # The heart of your Prisma setup
+│   └── seed.js             # Script for seeding the database
+├── scripts/
+│   └── dev-setup.js        # The interactive development setup script
+├── src/
+│   ├── api/                # API routes, controllers, services
+│   ├── config/             # Environment configuration, etc.
+│   ├── middleware/         # Custom Express middleware
+│   ├── models/             # (If needed for business logic beyond Prisma)
+│   ├── services/           # Business logic services (e.g., email, payments)
+│   ├── utils/              # Shared utilities (logger, etc.)
+│   └── server.js           # The main entry point of the application
+├── .env.example            # Example environment variables
+├── docker-compose.yml      # Docker services definition
+└── package.json
 ```
 
----
+## Environment Variables
 
-## Common Commands
+All environment-specific configurations are managed through `.env` files, loaded by `dotenv-cli`.
 
-Here is a breakdown of the most frequently used scripts available in the project.
+- `.env.development`: Used for `npm run dev`, `npm run db:*`, etc.
+- `.env.production`: Used for `npm run start:prod`.
 
-### Development
-* `npm run dev` – Starts the local development server.
-* `npm run dev:debug` – Starts the development server with the debugger attached.
-* `npm run validate` – Checks the environment variables and configuration for any issues.
+The `dev-setup.js` script will prompt you to create a `.env` file from `.env.example`. It's crucial that this file is kept up-to-date and not committed to version control.
 
-### Database 🗄️
-* `npm run db:studio` – Opens the Prisma Studio GUI to view and manage your database.
-* `npm run db:migrate` – Creates a new database migration from your schema changes.
-* `npm run db:seed` – Populates the database with initial seed data.
-* `npm run reset` – Resets the database and then re-seeds it. **Warning:** This will delete all existing data.
+## Database Management with Prisma
 
-### Docker 🐳
-* `npm run docker:up` – Starts all services defined in the `docker-compose.yml` file.
-* `npm run docker:down` – Stops all running Docker services.
-* `npm run docker:logs` – Displays logs from the running Docker containers.
+We use Prisma as our ORM for all database interactions.
 
-### Workflow
-- `npm run setup` - Initial project setup
-- `npm run reset` - Reset database and reseed
-- `npm run fresh` - Complete fresh start
+### Migrations
 
+Migrations are the preferred way to evolve the database schema in a team environment. Instead of `db:push`, always use `db:migrate`.
+
+1.  **Modify your schema**: Make changes to `prisma/schema.prisma`.
+2.  **Create a new migration**: Run the following command and give the migration a descriptive name.
+    ```bash
+    npm run db:migrate
+    ```
+    This command creates a new SQL migration file and applies it to your development database.
+
+### Seeding
+
+To populate your database with initial data, modify `prisma/seed.js` and run:
+```bash
+npm run db:seed
+```
+This is automatically run as part of the `npm run setup:dev` script.
+
+### Resetting the Database
+
+To completely wipe your local database, re-apply all migrations, and re-seed the data, use the `reset` command. This is useful when you need a clean slate.
+```bash
+npm run reset
+```
+
+## Logging
+
+We use a powerful `winston`-based logger found in `src/utils/logger.js`.
+
+- **Development**: Logs are color-coded, timestamped, and printed to the console for easy debugging.
+- **Production**: Logs are written as structured JSON to rotating files in the `logs/` directory, which is ideal for log aggregation services.
+
+Use the logger throughout the application instead of `console.log` for consistent and environment-aware logging.
