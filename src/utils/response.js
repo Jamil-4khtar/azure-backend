@@ -1,32 +1,42 @@
-import logger from './logger.js';
+import { handlePrismaError } from "./errors.js";
+import logger from "./logger.js";
 
 /**
  * Success response helper
  */
-export function successResponse(res, data = null, message = 'Success', statusCode = 200) {
+export function successResponse(
+  res,
+  data = null,
+  message = "Success",
+  statusCode = 200
+) {
   const response = {
     success: true,
     message,
     timestamp: new Date().toISOString(),
     requestId: res.req?.id,
-    ...(data && { data })
+    ...(data && { data }),
   };
-  
+
   // Log successful responses in debug mode
-  logger.debug('Success response sent', {
+  logger.debug("Success response sent", {
     statusCode,
     message,
     requestId: res.req?.id,
-    dataKeys: data ? Object.keys(data) : null
+    dataKeys: data ? Object.keys(data) : null,
   });
-  
+
   return res.status(statusCode).json(response);
 }
 
 /**
  * Created response helper (201)
  */
-export function createdResponse(res, data = null, message = 'Created successfully') {
+export function createdResponse(
+  res,
+  data = null,
+  message = "Created successfully"
+) {
   return successResponse(res, data, message, 201);
 }
 
@@ -34,39 +44,43 @@ export function createdResponse(res, data = null, message = 'Created successfull
  * No content response helper (204)
  */
 export function noContentResponse(res) {
-  logger.debug('No content response sent', {
-    requestId: res.req?.id
+  logger.debug("No content response sent", {
+    requestId: res.req?.id,
   });
-  
+
   return res.status(204).send();
 }
 
 /**
  * Paginated response helper
  */
-export function paginatedResponse(res, data, pagination, message = 'Success') {
-	
+export function paginatedResponse(res, data, pagination, message = "Success") {
   const response = {
     success: true,
     message,
     timestamp: new Date().toISOString(),
     requestId: res.req?.id,
     data,
-		pagination
+    pagination,
   };
-  
-  logger.debug('Paginated response sent', {
+
+  logger.debug("Paginated response sent", {
     requestId: res.req?.id,
-    pagination: response.pagination
+    pagination: response.pagination,
   });
-  
+
   return res.status(200).json(response);
 }
 
 /**
  * Error response helper (for manual error responses)
  */
-export function errorResponse(res, message = 'Error occurred', statusCode = 500, code = 'ERROR') {
+export function errorResponse(
+  res,
+  message = "Error occurred",
+  statusCode = 500,
+  code = "ERROR"
+) {
   const response = {
     success: false,
     error: {
@@ -74,16 +88,64 @@ export function errorResponse(res, message = 'Error occurred', statusCode = 500,
       code,
       statusCode,
       timestamp: new Date().toISOString(),
-      requestId: res.req?.id
-    }
+      requestId: res.req?.id,
+    },
   };
-  
-  logger.warn('Manual error response sent', {
+
+  logger.warn("Manual error response sent", {
     message,
     statusCode,
     code,
-    requestId: res.req?.id
+    requestId: res.req?.id,
   });
-  
+
   return res.status(statusCode).json(response);
+}
+
+export function globalDevErrorResponse(
+  res,
+  error,
+  { timestamp, requestId, originalError }
+) {
+  // Prisma error mapping step
+  let handledError = error;
+  if (
+    error.code &&
+    (error.constructor?.name?.startsWith("Prisma") ||
+      typeof error.code === "string")
+  ) {
+    handledError = handlePrismaError(error);
+  }
+  const responsePayload = {
+    success: false,
+    error: {
+      message: handledError.message,
+      code: handledError.code || "INTERNAL_ERROR",
+      statusCode: handledError.statusCode || 500,
+      timestamp,
+      requestId,
+      stack: handledError.stack || originalError?.stack,
+      details: handledError.details,
+    },
+  };
+  res.status(responsePayload.error.statusCode).json(responsePayload);
+}
+
+export function globalProdErrorResponse(
+  res,
+  error,
+  { timestamp, requestId, originalError }
+) {
+  const responsePayload = {
+    success: false,
+    error: {
+      message: error.message,
+      code: error.code || "INTERNAL_ERROR",
+      statusCode: error.statusCode || 500,
+      timestamp,
+      requestId,
+    },
+  };
+
+  res.status(responsePayload.error.statusCode).json(responsePayload);
 }

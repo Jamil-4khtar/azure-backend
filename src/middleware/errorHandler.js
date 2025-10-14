@@ -1,6 +1,7 @@
 import logger from '../utils/logger.js';
 import { AppError, isOperationalError } from '../utils/errors.js';
-
+import config from '../config/env.js';
+import { globalDevErrorResponse	, globalProdErrorResponse } from '../utils/response.js';
 /**
  * Global error handling middleware
  */
@@ -19,64 +20,18 @@ export function globalErrorHandler(error, req, res, next) {
     isOperational: isOperationalError(error)
   });
   
-  // Handle specific error types in development
-  if (process.env.NODE_ENV === 'development') {
-    err = handleDevelopmentError(error);
-  } else {
-    err = handleProductionError(error);
-  }
-  
   // Send error response
-  res.status(err.statusCode).json({
-    success: false,
-    error: {
-      message: err.message,
-      code: err.code || 'INTERNAL_ERROR',
-      statusCode: err.statusCode,
-      timestamp,
-      requestId: req.id,
-      ...(process.env.NODE_ENV === 'development' && {
-        stack: error.stack,
-        details: err.details
-      })
-    }
-  });
+	config.server.nodeEnv === "development" ? globalDevErrorResponse(res, err, {
+    timestamp,
+    requestId: req.id,
+    originalError: error
+  }) : globalProdErrorResponse(res, err, {
+    timestamp,
+    requestId: req.id,
+    originalError: error
+  })
 }
 
-/**
- * Handle errors in development environment
- */
-function handleDevelopmentError(error) {
-  return {
-    statusCode: error.statusCode || 500,
-    message: error.message,
-    code: error.code,
-    details: error.details,
-    stack: error.stack
-  };
-}
-
-/**
- * Handle errors in production environment
- */
-function handleProductionError(error) {
-  // Operational, trusted error: send message to client
-  if (isOperationalError(error)) {
-    return {
-      statusCode: error.statusCode,
-      message: error.message,
-      code: error.code,
-      details: error.details
-    };
-  }
-  
-  // Programming or other unknown error: don't leak error details
-  return {
-    statusCode: 500,
-    message: 'Something went wrong!',
-    code: 'INTERNAL_ERROR'
-  };
-}
 
 /**
  * Handle 404 errors

@@ -1,60 +1,43 @@
-import { requestPasswordReset, resendResetEmail, resetPassword } from './password-reset.service.js';
+import {
+  requestPasswordReset,
+  resendResetEmail,
+  resetPassword,
+} from "./password-reset.service.js";
+import asyncHandler from "../../utils/asyncHandler.js";
+import { successResponse } from "../../utils/response.js";
+import { AuthenticationError } from "../../utils/errors.js";
 
-export const handlePasswordResetRequest = async (req, res) => {
-  try {
-    const { email } = req.body;
-    if (!email) {
-      return res.status(400).json({ error: 'Email is required.' });
-    }
+export const handlePasswordResetRequest = asyncHandler(async (req, res) => {
+  const { email } = req.body;
 
-    await requestPasswordReset(email);
+  await requestPasswordReset(email);
 
-    // Always send a success response to prevent attackers from guessing which emails are registered.
-    res.status(200).json({ message: 'If an account with that email exists, a password reset link has been sent.' });
-
-  } catch (error) {
-    console.error('Password Reset Request Error:', error);
-    // Send a generic error message
-    res.status(500).json({ error: 'An unexpected error occurred.' });
-  }
-};
+  // Always send a success response to prevent attackers from guessing which emails are registered.
+  return successResponse(
+    res,
+    null,
+    "'If an account with that email exists, a password reset link has been sent.'"
+  );
+});
 
 // --- NEW CONTROLLER: HANDLE RESEND ---
-export const handleResendRequest = async (req, res) => {
-    try {
-        const { email } = req.body;
-        if (!email) {
-            return res.status(400).json({ error: 'Email is required.' });
-        }
-        const result = await resendResetEmail(email);
-        res.status(200).json(result);
-    } catch (error) {
-        console.error('Resend Email Error:', error);
-        res.status(500).json({ error: 'An unexpected error occurred.' });
-    }
-};
+export const handleResendRequest = asyncHandler(async (req, res) => {
+  const { email } = req.body;
 
+  const result = await resendResetEmail(email);
+
+  return successResponse(res, result);
+});
 
 // --- NEW CONTROLLER: HANDLE PASSWORD RESET ---
-export const handleResetPassword = async (req, res) => {
-  try {
-    const { token, password } = req.body;
+export const handleResetPassword = asyncHandler(async (req, res) => {
+  const { token, password } = req.body;
 
-    if (!token || !password) {
-      return res.status(400).json({ error: 'Token and new password are required.' });
-    }
-    
-    // You might want to add password strength validation here
+  const success = await resetPassword(token, password);
 
-    const success = await resetPassword(token, password);
-
-    if (!success) {
-      return res.status(400).json({ error: 'Invalid or expired token.' });
-    }
-
-    res.status(200).json({ message: 'Password has been reset successfully.' });
-  } catch (error) {
-    console.error('Reset Password Error:', error);
-    res.status(500).json({ error: 'An unexpected error occurred.' });
+  if (!success) {
+    throw new AuthenticationError("Invalid or expired token.");
   }
-};
+
+  return successResponse(res, null, "Password has been reset successfully.");
+});
