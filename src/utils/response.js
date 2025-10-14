@@ -51,26 +51,6 @@ export function noContentResponse(res) {
   return res.status(204).send();
 }
 
-/**
- * Paginated response helper
- */
-export function paginatedResponse(res, data, pagination, message = "Success") {
-  const response = {
-    success: true,
-    message,
-    timestamp: new Date().toISOString(),
-    requestId: res.req?.id,
-    data,
-    pagination,
-  };
-
-  logger.debug("Paginated response sent", {
-    requestId: res.req?.id,
-    pagination: response.pagination,
-  });
-
-  return res.status(200).json(response);
-}
 
 /**
  * Error response helper (for manual error responses)

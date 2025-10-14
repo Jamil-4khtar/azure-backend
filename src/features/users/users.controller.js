@@ -1,4 +1,8 @@
-import { NotFoundError, paginatedResponse, successResponse, asyncHandler } from "../../utils/index.js";
+import {
+  NotFoundError,
+  successResponse,
+  asyncHandler,
+} from "../../utils/index.js";
 import * as userService from "./users.service.js";
 
 // Get all users with pagination and filtering
@@ -20,7 +24,7 @@ export const getAllUsers = asyncHandler(async (req, res) => {
     hasPrev: result.hasPrev,
   };
 
-  return paginatedResponse(res, result.users, pagination);
+  return successResponse(res, { users: result.users, pagination });
 });
 
 // Get user by ID
@@ -31,7 +35,7 @@ export const getUserById = asyncHandler(async (req, res) => {
   if (!user) {
     throw new NotFoundError("User not found");
   }
-  return successResponse(res, user);
+  return successResponse(res, { user });
 });
 
 // Update user
@@ -45,35 +49,39 @@ export const updateUser = asyncHandler(async (req, res) => {
     throw new NotFoundError("User not found");
   }
 
-  return successResponse(res, updatedUser, "User updated successfully");
+  return successResponse(
+    res,
+    { user: updatedUser },
+    "User updated successfully"
+  );
 });
 
 // Delete user
-export const deleteUser = async (req, res) => {
-  try {
-    const { id } = req.params;
-    const deleted = await userService.deleteUser(id);
+// export const deleteUser = async (req, res) => {
+//   try {
+//     const { id } = req.params;
+//     const deleted = await userService.deleteUser(id);
 
-    if (!deleted) {
-      return res.status(404).json({
-        success: false,
-        message: "User not found",
-      });
-    }
+//     if (!deleted) {
+//       return res.status(404).json({
+//         success: false,
+//         message: "User not found",
+//       });
+//     }
 
-    res.status(200).json({
-      success: true,
-      message: "User deleted successfully",
-    });
-  } catch (error) {
-    console.error("Delete user error:", error);
-    res.status(500).json({
-      success: false,
-      message: "Failed to delete user",
-      error: error.message,
-    });
-  }
-};
+//     res.status(200).json({
+//       success: true,
+//       message: "User deleted successfully",
+//     });
+//   } catch (error) {
+//     console.error("Delete user error:", error);
+//     res.status(500).json({
+//       success: false,
+//       message: "Failed to delete user",
+//       error: error.message,
+//     });
+//   }
+// };
 
 // Toggle user status (active/inactive)
 export const toggleUserStatus = asyncHandler(async (req, res) => {
@@ -86,7 +94,7 @@ export const toggleUserStatus = asyncHandler(async (req, res) => {
 
   return successResponse(
     res,
-    updatedUser,
+    { user: updatedUser },
     `User ${updatedUser.isActive ? "activated" : "deactivated"} successfully`
   );
 });
@@ -95,5 +103,5 @@ export const toggleUserStatus = asyncHandler(async (req, res) => {
 export const getUserStats = asyncHandler(async (req, res) => {
   const stats = await userService.getUserStats();
 
-  return successResponse(res, stats);
+  return successResponse(res, { stats });
 });

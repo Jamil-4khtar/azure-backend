@@ -10,7 +10,6 @@ const envSchema = Joi.object({
   DB_PASSWORD: Joi.string().min(8).required(),
   DB_NAME: Joi.string().required(),
   DB_HOST: Joi.string().required(),
-  DB_PORT_HOST: Joi.number().port().required(),
   DATABASE_URL: Joi.string().uri().required(),
   DB_PORT: Joi.number().port().required(),
 
