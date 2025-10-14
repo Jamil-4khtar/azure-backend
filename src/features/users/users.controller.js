@@ -1,6 +1,4 @@
-import asyncHandler from "../../utils/asyncHandler.js";
-import { NotFoundError } from "../../utils/errors.js";
-import { paginatedResponse, successResponse } from "../../utils/response.js";
+import { NotFoundError, paginatedResponse, successResponse, asyncHandler } from "../../utils/index.js";
 import * as userService from "./users.service.js";
 
 // Get all users with pagination and filtering

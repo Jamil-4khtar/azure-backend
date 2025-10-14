@@ -1,6 +1,6 @@
 import prisma from "../../config/db.js";
 import bcrypt from "bcryptjs";
-import { notFoundHandler } from "../../middleware/errorHandler.js";
+import { notFoundHandler } from "../../middleware/index.js";
 
 /* 
 Get all users

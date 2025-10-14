@@ -1,7 +1,6 @@
 import prisma from "../../config/db.js";
 import bcrypt from "bcryptjs";
-import { generateAuthToken } from "../../utils/tokens.js";
-import { AuthenticationError } from "../../utils/errors.js";
+import { generateAuthToken, AuthenticationError } from '../../utils/index.js'
 
 export const findUserByEmail = async (email) => {
   return await prisma.user.findUnique({

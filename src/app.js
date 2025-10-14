@@ -2,8 +2,6 @@ import cors from "cors";
 import express from "express";
 import "dotenv/config.js";
 import config from "./config/env.js";
-import { requestId, requestLogger } from "./middleware/requestLogger.js";
-import logger from "./utils/logger.js";
 import authRoutes from "./features/auth/index.js";
 import inviteRoutes from "./features/invite/index.js";
 import passwordResetRoutes from "./features/password-reset/index.js";
@@ -11,14 +9,16 @@ import contentRoutes from "./features/content/index.js";
 import pagesRoutes from "./features/pages/index.js";
 import userRoutes from "./features/users/index.js";
 import helmet from "helmet";
-import { globalLimiter } from "./middleware/rateLimiter.js";
+import { logger, successResponse } from './utils/index.js'
 import {
+  requestId,
+  requestLogger,
+  globalLimiter,
   globalErrorHandler,
   handleUncaughtException,
   handleUnhandledRejection,
   notFoundHandler,
-} from "./middleware/errorHandler.js";
-import { successResponse } from "./utils/response.js";
+} from "./middleware/index.js";
 
 handleUncaughtException();
 handleUnhandledRejection();

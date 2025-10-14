@@ -177,10 +177,10 @@ logger.logError = function(error, req = null, additional = {}) {
 };
 
 // Create a stream object for Morgan (if you want to use it later)
-logger.stream = {
-  write: function(message) {
-    logger.http(message.trim());
-  }
-};
+// logger.stream = {
+//   write: function(message) {
+//     logger.http(message.trim());
+//   }
+// };
 
 export default logger;

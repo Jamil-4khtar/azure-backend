@@ -1,6 +1,6 @@
 import { Router } from 'express';
 import { listPages, createNewPage } from './pages.controller.js';
-import { isAuthenticated } from '../../middleware/isAuthenticated.js';
+import { isAuthenticated } from '../../middleware/index.js';
 
 const router = Router();
 

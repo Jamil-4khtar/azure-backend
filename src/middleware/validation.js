@@ -1,5 +1,5 @@
 import Joi from 'joi';
-import { ValidationError } from '../utils/errors.js';
+import { ValidationError } from '../utils/index.js';
 
 // Strong password schema
 const passwordSchema = Joi.string()

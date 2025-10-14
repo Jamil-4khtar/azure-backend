@@ -1,6 +1,5 @@
-import asyncHandler from '../../utils/asyncHandler.js';
-import { successResponse } from '../../utils/response.js';
 import { createInvitation } from './invite.service.js';
+import { asyncHandler, successResponse } from '../../utils/index.js'
 
 export const inviteUser = asyncHandler(async (req, res) => {
     const { email, role = 'EDITOR' } = req.body;

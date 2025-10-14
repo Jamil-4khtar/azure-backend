@@ -4,7 +4,7 @@ import {
   handleResendRequest, 
   handleResetPassword 
 } from './password-reset.controller.js';
-import { passwordResetConfirmLimiter, passwordResetLimiter } from '../../middleware/rateLimiter.js';
+import { passwordResetConfirmLimiter, passwordResetLimiter } from '../../middleware/index.js';
 
 const router = Router();
 

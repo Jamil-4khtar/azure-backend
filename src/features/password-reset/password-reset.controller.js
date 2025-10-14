@@ -3,9 +3,11 @@ import {
   resendResetEmail,
   resetPassword,
 } from "./password-reset.service.js";
-import asyncHandler from "../../utils/asyncHandler.js";
-import { successResponse } from "../../utils/response.js";
-import { AuthenticationError } from "../../utils/errors.js";
+import {
+  asyncHandler,
+  successResponse,
+  AuthenticationError,
+} from "../../utils/index.js";
 
 export const handlePasswordResetRequest = asyncHandler(async (req, res) => {
   const { email } = req.body;

@@ -1,6 +1,6 @@
 import { Router } from 'express';
 import { inviteUser } from './invite.controller.js';
-import { isAdmin } from '../../middleware/isAdmin.js';
+import { isAdmin } from '../../middleware/index.js';
 
 const router = Router();
 
