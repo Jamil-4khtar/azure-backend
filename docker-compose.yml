@@ -4,7 +4,7 @@ services:
     image: postgres:latest
     container_name: azure_postgres
     env_file:
-      - .env
+      - .env.development
     environment:
       POSTGRES_USER: ${DB_USER}
       POSTGRES_PASSWORD: ${DB_PASSWORD}
@@ -28,7 +28,7 @@ services:
     image: rnwood/smtp4dev
     container_name: azure_smtp
     env_file:
-      - .env
+      - .env.development
     restart: unless-stopped
     ports:
       - "8026:80"   # Web UI
