@@ -133,7 +133,7 @@ export function handlePrismaError(error) {
     case 'P1002':
       return new DatabaseError('Database connection timeout');
     default:
-      return new DatabaseError(`Database operation failed: ${error.message}`, error);
+      return new DatabaseError(`${error.message}`, error);
   }
 }
 

@@ -52,36 +52,6 @@ export function noContentResponse(res) {
 }
 
 
-/**
- * Error response helper (for manual error responses)
- */
-export function errorResponse(
-  res,
-  message = "Error occurred",
-  statusCode = 500,
-  code = "ERROR"
-) {
-  const response = {
-    success: false,
-    error: {
-      message,
-      code,
-      statusCode,
-      timestamp: new Date().toISOString(),
-      requestId: res.req?.id,
-    },
-  };
-
-  logger.warn("Manual error response sent", {
-    message,
-    statusCode,
-    code,
-    requestId: res.req?.id,
-  });
-
-  return res.status(statusCode).json(response);
-}
-
 export function globalDevErrorResponse(
   res,
   error,
